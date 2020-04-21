@@ -1,0 +1,42 @@
+{
+  "name": "node-sso",
+  "version": "1.0.0",
+  "author": "jsservice",
+  "license":"MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jsservice/node-sso.git"
+  },
+  "scripts": {
+    "start": "node bin/www",
+    "dev": "cross-env NODE_ENV='dev' ./node_modules/.bin/nodemon bin/www",
+    "prod": "cross-env NODE_ENV='prod' PORT=3100 pm2 start bin/www -i 4 -n SweetPortal",
+    "test": "cross-env NODE_ENV='test' ./node_modules/.bin/nodemon bin/www"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "debug": "^4.1.1",
+    "eureka-js-client": "^4.5.0",
+    "express-to-koa": "^2.0.0",
+    "js-base64": "^2.5.2",
+    "koa": "^2.7.0",
+    "koa-bodyparser": "^3.2.0",
+    "koa-convert": "^1.2.0",
+    "koa-generic-session": "^2.0.4",
+    "koa-json": "^2.0.2",
+    "koa-onerror": "^4.1.0",
+    "koa-redis": "^4.0.1",
+    "koa-router": "^7.4.0",
+    "koa-static": "^5.0.0",
+    "log4js": "^6.1.2",
+    "moment": "^2.24.0",
+    "query-string": "^6.11.1",
+    "require-all": "^3.0.0",
+    "swagger-jsdoc": "^3.5.0",
+    "swagger-stats": "^0.95.16"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.0",
+    "nodemon": "^1.19.1"
+  }
+}
