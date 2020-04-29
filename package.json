@@ -37,6 +37,8 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.0",
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.1",
+    "chai": "4.2.0",
+    "mochawesome": "5.0.0"
   }
 }
