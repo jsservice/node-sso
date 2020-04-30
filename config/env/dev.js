@@ -23,7 +23,8 @@ module.exports = {
             host: 'localhost',
             port: 8761,
             servicePath: '/eureka/apps/',
-            registryFetchInterval: 5000
+            registryFetchInterval: 5000,
+            preferIpAddress: true
         },
 
         //客户端配置（可选，覆盖默认配置）
@@ -62,31 +63,27 @@ module.exports = {
 
     /**********************************************************************************************
      *
-     * Redis Server 配置（Session & Cache）
-     *
-     * 集群选项参考
-     * https://github.com/luin/ioredis/blob/master/API.md#new-clusterstartupnodes-options
+     * Redis Server 配置
      *
      **********************************************************************************************/
-    // redis : {
-    //
-    //     sentinels: [
-    //         { host: "172.25.221.124", port: 26379 },
-    //         { host: "172.25.221.125", port: 26379 },
-    //         { host: "172.25.221.126", port: 26379 }
-    //     ],
-    //
-    //     name: "DEV",
-    //
-    //     db : 13
-    //
-    //     //节点
-    //     //clusterNodes : [],
-    //
-    //     //集群选项
-    //     //clusterOptions : {},
-    //
-    // },
+    redis : {
+
+        // 哨兵
+        // sentinels: [
+        //     { host: "172.25.221.124", port: 26379 },
+        //     { host: "172.25.221.125", port: 26379 },
+        //     { host: "172.25.221.126", port: 26379 }
+        // ],
+        // name: "DEV",
+        // db : 13
+
+        // 单机
+        port: 6379,
+        host: "127.0.0.1",
+        password: "auth",
+        db: 0,
+
+    },
 
 
     /**********************************************************************************************

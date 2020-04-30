@@ -2,6 +2,7 @@ const env = process.env.NODE_ENV;
 const port = process.env.PORT || 3000;
 const localConfig = require('./config/env/'+env)
 const Koa = require('koa')
+const Redis = require('ioredis');
 const Eureka = require('eureka-js-client').Eureka;
 
 const koaBodyParser = require('koa-bodyparser');
@@ -9,7 +10,7 @@ const moment = require('moment')
 const requireAll = require('require-all');
 const log4js = require('./modules/logger');
 const log4jsIns = log4js.getLog4jsInstance(localConfig.service, localConfig.log)
-const logger = log4jsIns.getLogger("[HTTP]");
+const logger = log4jsIns.getLogger("[MAIN]");
 const network = require('./utils/NetworkUtils')
 const app = new Koa()
 
@@ -33,8 +34,11 @@ function setGlobal(){
         //日志
         logger : logger,
 
-        //Eureka Client
+        //eureka
         eureka : null,
+
+        //cache
+        cache : null,
 
     }
 }
@@ -67,7 +71,7 @@ async function connectEurekaServer(){
         },
     };
 
-    Eureka.prototype.waitForStarted = function () {
+    Eureka.prototype.waitForConnected = function () {
         return new Promise((resolve, reject)=>{
             this.start();
             this.on("started", ()=>{
@@ -77,13 +81,42 @@ async function connectEurekaServer(){
     }
 
     let eurekaClient = new Eureka(eurekaConfig)
-    await eurekaClient.waitForStarted()
+    await eurekaClient.waitForConnected()
+
+    eurekaClient.on("registered", ()=>{
+        // Fired when the eureka client is registered with eureka.
+    })
     eurekaClient.on("registryUpdated", ()=>{
-        //eurekaClient.aliveInstances = Portal.eureka.getInstancesByAppId(Portal.config.http.serviceName);
+        // Fired when the eureka client has successfully update it's registries.
     })
 
     JSService.eureka = eurekaClient;
 
+}
+
+async function connectRedisServer() {
+    let redisConfig = localConfig.redis;
+
+    Redis.prototype.waitForConnected = function () {
+        return new Promise((resolve, reject)=>{
+            this.on("ready", ()=>{
+                resolve();
+            });
+            this.on("error", ()=>{
+                reject('Connect redis server error.');
+            });
+        })
+    }
+
+    let redis = new Redis(redisConfig)
+    await redis.waitForConnected()
+
+    redis.on("reconnecting", ()=>{
+        // emits after close when a reconnection will be made.
+        // The argument of the event is the time (in ms) before reconnecting.
+    })
+
+    JSService.cache = redis;
 }
 
 async function init() {
@@ -93,6 +126,9 @@ async function init() {
 
     // 2. KOA中间件
     useMiddleware();
+
+    // 3. 连接Redis Server
+    await connectRedisServer();
 
     // 4. 连接Eureka Server
     await connectEurekaServer();

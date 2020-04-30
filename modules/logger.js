@@ -12,12 +12,12 @@ module.exports = {
         log4js.configure({
             appenders: {
                 out: { type: 'stdout' },
-                http : { type: 'file', filename: `${path}/${serviceName}.http.log`},
+                http : { type: 'file', filename: `${path}/${serviceName}.log`},
                 api : { type: 'file', filename: `${path}/${serviceName}.api.log`},
             },
             categories: {
                 default: { appenders: ['out'], level: 'info' },
-                '[HTTP]': { appenders: ['out', 'http'], level: level },
+                '[MAIN]': { appenders: ['out', 'http'], level: level },
                 '[API]': { appenders: ['out', 'api'], level: level },
             }
         });
