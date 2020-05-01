@@ -182,7 +182,7 @@ function initSwaggerAndStat(){
     app.use(ex2k(swaggerStat.getMiddleware({ swaggerSpec : swaggerSpec })));
 }
 
-function useMiddleware(){
+function useBaseMiddleware(){
     app.use(koaStatic(__dirname + '/public')) //静态目录
     app.use(koaBodyParser({
         enableTypes : ['json', 'form']
@@ -195,7 +195,7 @@ async function init() {
     setGlobal();
 
     // 2. KOA中间件
-    useMiddleware();
+    useBaseMiddleware();
 
     // 3. 连接Redis Server
     await connectRedisServer();
@@ -203,11 +203,11 @@ async function init() {
     // 4. 连接Eureka Server
     await connectEurekaServer();
 
-    // 4. 加载路由
-    loadControllers();
-
-    // Swagger
+    // 5. Swagger UI & 监控（需要在路由之前）
     initSwaggerAndStat();
+
+    // 6. 加载路由
+    loadControllers();
 }
 
 
