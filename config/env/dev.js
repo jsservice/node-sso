@@ -80,7 +80,7 @@ module.exports = {
         // 单机
         port: 6379,
         host: "127.0.0.1",
-        password: "auth",
+        //password: "auth",
         db: 0,
 
     },

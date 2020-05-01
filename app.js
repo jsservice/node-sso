@@ -1,3 +1,4 @@
+const pkg = require('./package.json');
 const env = process.env.NODE_ENV;
 const port = process.env.PORT || 3000;
 const localConfig = require('./config/env/'+env)
@@ -5,9 +6,15 @@ const Koa = require('koa')
 const Redis = require('ioredis');
 const Eureka = require('eureka-js-client').Eureka;
 
+const ex2k = require('express-to-koa');
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerStat = require('swagger-stats');
 const koaBodyParser = require('koa-bodyparser');
+const koaRouter = require('koa-router')
+const koaStatic = require('koa-static');
 const moment = require('moment')
 const requireAll = require('require-all');
+const constants = require('./config/constants');
 const log4js = require('./modules/logger');
 const log4jsIns = log4js.getLog4jsInstance(localConfig.service, localConfig.log)
 const logger = log4jsIns.getLogger("[MAIN]");
@@ -41,12 +48,6 @@ function setGlobal(){
         cache : null,
 
     }
-}
-
-function useMiddleware(){
-    app.use(koaBodyParser({
-        enableTypes : ['json', 'form']
-    }));
 }
 
 async function connectEurekaServer(){
@@ -119,6 +120,75 @@ async function connectRedisServer() {
     JSService.cache = redis;
 }
 
+
+
+function loadControllers(){
+    const paths = [];
+    const router = koaRouter();
+    const controllers = requireAll({
+        dirname     :  __dirname + '/controllers',
+        filter      :  /(.+Controller)\.js$/,
+        resolve     : function (ctrl) {
+            return ctrl;
+        }
+    })
+    for(let ctrl in controllers){
+        for(let key in controllers[ctrl]){
+            let arr = key.trim().split(/\s+/);
+            let method = arr[0]
+            let path = arr[1];
+            if(arr.length <= 1){
+                path = method;
+                method = 'GET'; //默认GET
+            }
+            if(!router[method.toLowerCase()]){
+                throw new Error(`Unknown controller method [ ${method} ] in ${ctrl}`);
+            }
+            router[method.toLowerCase()](path, controllers[ctrl][key])
+            paths.push(path)
+        }
+    }
+
+    router.prefix(constants.API_PREFIX)
+    app.use(router.routes(), router.allowedMethods())
+
+    logger.info('Loaded ' + paths.length + ' controllers.')
+    return paths;
+}
+
+function initSwaggerAndStat(){
+    const router = koaRouter();
+    const options = {
+        definition: {
+            //openapi: '3.0.0',  // Specification (optional, defaults to swagger: '2.0')
+            info: {
+                title: localConfig.service,
+                version: pkg.version
+            },
+        },
+        apis: ['./controllers/*Controller.js'],
+    };
+    const swaggerSpec = swaggerJSDoc(options);
+    for(let key in swaggerSpec.paths){
+        let newKey = `${constants.API_PREFIX}${key}`
+        swaggerSpec.paths[newKey] = swaggerSpec.paths[key]
+        delete swaggerSpec.paths[key]
+    }
+    router.get('/swagger-ui/swagger.json', (ctx, next) => {
+        ctx.set('Content-Type', 'application/json');
+        ctx.body = swaggerSpec;
+    });
+    app.use(router.routes(), router.allowedMethods())
+    app.use(ex2k(swaggerStat.getMiddleware({ swaggerSpec : swaggerSpec })));
+}
+
+function useMiddleware(){
+    app.use(koaStatic(__dirname + '/public')) //静态目录
+    app.use(koaBodyParser({
+        enableTypes : ['json', 'form']
+    }));
+}
+
 async function init() {
 
     // 1. 初始化全局变量
@@ -132,6 +202,12 @@ async function init() {
 
     // 4. 连接Eureka Server
     await connectEurekaServer();
+
+    // 4. 加载路由
+    loadControllers();
+
+    // Swagger
+    initSwaggerAndStat();
 }
 
 
@@ -157,6 +233,7 @@ init()
     })
     .catch((e)=>{
         logger.error(e);
+        process.exit()
     })
 
 module.exports = app
