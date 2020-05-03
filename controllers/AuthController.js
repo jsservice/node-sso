@@ -24,8 +24,12 @@ module.exports = {
      */
     'post /auth/login' : async function(ctx, next){
 
+        let resp = await JSService.models.User.findAll({
+            //attributes: ['foo', 'bar']
+        });
+
         ctx.body = {
-            storeCode : ctx.request.body['storeCode'],
+            storeCode : resp,
             message : 'ok'
         }
 

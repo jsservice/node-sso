@@ -6,6 +6,8 @@ jsservice/node-sso
 
 ### 快速开始
   ```
+  cnpm install //SQLite3需要cnpm安装
+  
   npm run dev
   ```
 

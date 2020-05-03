@@ -48,6 +48,9 @@ function setGlobal(){
         //cache
         cache : null,
 
+        //数据模型
+        models : {}
+
     }
 }
 
@@ -183,9 +186,16 @@ function initSwaggerAndStat(){
     app.use(ex2k(swaggerStat.getMiddleware({ swaggerSpec : swaggerSpec })));
 }
 
-function loadDBModels() {
+async function loadDBModels() {
     const dbConfig = localConfig.database
-    const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig.options)
+    if(dbConfig.options.dialect === 'sqlite'){
+        const dbFilePath =  `${__dirname}/data/${localConfig.service}.db`;
+        dbConfig.options.storage = dbConfig.options.storage || dbFilePath;
+    }else if(dbConfig.options.dialect === 'mysql'){
+
+    }
+
+    const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig.options);
     const models = requireAll({
         dirname     :  __dirname + '/models',
         filter      :  /(.+)\.js$/,
@@ -194,14 +204,12 @@ function loadDBModels() {
         }
     })
     for(let key in models){
-        console.log(key)
+        const model = sequelize.define(key, models[key]);
+        JSService.models[key] = model;
     }
-    // const Project = sequelize.define('project', {
-    //     title: Sequelize.STRING,
-    //     description: Sequelize.TEXT
-    // })
 
-
+    //同步、自动建表
+    await sequelize.sync();
 }
 
 function useBaseMiddleware(){
@@ -220,10 +228,10 @@ async function init() {
     useBaseMiddleware();
 
     // 3. 连接Redis Server
-    //await connectRedisServer();
+    await connectRedisServer();
 
     // 4. 连接Eureka Server
-    //await connectEurekaServer();
+    await connectEurekaServer();
 
     // 5. Swagger UI & 监控（需要在路由之前）
     initSwaggerAndStat();

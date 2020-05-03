@@ -68,12 +68,13 @@ module.exports = {
      **********************************************************************************************/
     database : {
 
-        database: '',
+        database: 'node-sso',
         username : '',
         password : '',
         options : {
             dialect: 'sqlite',
-            storage: './data/sso.sqlite'
+            //storage: '/opt/log/jsservice/node-sso/sso.sqlite',
+            operatorsAliases: false
         }
 
     },
@@ -178,7 +179,7 @@ module.exports = {
 
         level : 'info',
 
-        //path : 'C:\\Users\\71615088\\Desktop',
+        //path : '/opt/log/jsservice/node-sso',
 
     },
 

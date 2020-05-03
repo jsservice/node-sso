@@ -49,4 +49,4 @@ module.exports = {
 
     createBy:{type: Sequelize.STRING},
 
-})
+}

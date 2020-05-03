@@ -34,6 +34,7 @@
     "query-string": "^6.11.1",
     "require-all": "^3.0.0",
     "sequelize": "^4.44.4",
+    "sqlite3": "^4.2.0",
     "swagger-jsdoc": "^3.5.0",
     "swagger-stats": "^0.95.16"
   },
