@@ -50,12 +50,14 @@ module.exports = {
 
         //QQ
         qq : {
-
+            appId : '',
+            appSecret : '',
         },
 
         //新浪微博
         weibo : {
-
+            appId : '',
+            appSecret : '',
         }
 
     },

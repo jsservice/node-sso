@@ -240,7 +240,7 @@ async function init() {
     loadControllers();
 
     // 7. 加载数据模型
-    loadDBModels();
+    await loadDBModels();
 }
 
 

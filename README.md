@@ -42,10 +42,13 @@ jsservice/node-sso
   http://localhost:3000/swagger-ui/index.html
   ```
 
-### 监控
+### 接口统计
   ```
   http://localhost:3000/swagger-stats/ui
   ```
+
+### 监控收集（Prometheus）
+
 
 ## 性能
 
