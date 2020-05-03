@@ -5,6 +5,7 @@ const localConfig = require('./config/env/'+env)
 const Koa = require('koa')
 const Redis = require('ioredis');
 const Eureka = require('eureka-js-client').Eureka;
+const Sequelize = require('sequelize');
 
 const ex2k = require('express-to-koa');
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -182,6 +183,27 @@ function initSwaggerAndStat(){
     app.use(ex2k(swaggerStat.getMiddleware({ swaggerSpec : swaggerSpec })));
 }
 
+function loadDBModels() {
+    const dbConfig = localConfig.database
+    const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig.options)
+    const models = requireAll({
+        dirname     :  __dirname + '/models',
+        filter      :  /(.+)\.js$/,
+        resolve     : function (model) {
+            return model;
+        }
+    })
+    for(let key in models){
+        console.log(key)
+    }
+    // const Project = sequelize.define('project', {
+    //     title: Sequelize.STRING,
+    //     description: Sequelize.TEXT
+    // })
+
+
+}
+
 function useBaseMiddleware(){
     app.use(koaStatic(__dirname + '/public')) //静态目录
     app.use(koaBodyParser({
@@ -198,16 +220,19 @@ async function init() {
     useBaseMiddleware();
 
     // 3. 连接Redis Server
-    await connectRedisServer();
+    //await connectRedisServer();
 
     // 4. 连接Eureka Server
-    await connectEurekaServer();
+    //await connectEurekaServer();
 
     // 5. Swagger UI & 监控（需要在路由之前）
     initSwaggerAndStat();
 
     // 6. 加载路由
     loadControllers();
+
+    // 7. 加载数据模型
+    loadDBModels();
 }
 
 

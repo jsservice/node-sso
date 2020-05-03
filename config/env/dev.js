@@ -68,10 +68,13 @@ module.exports = {
      **********************************************************************************************/
     database : {
 
-        type : 'mysql',
-        url : '',
+        database: '',
         username : '',
         password : '',
+        options : {
+            dialect: 'sqlite',
+            storage: './data/sso.sqlite'
+        }
 
     },
 
