@@ -39,7 +39,7 @@ module.exports = {
         }
     },
 
-    roles : {type: Sequelize.STRING},
+    authorities : {type: Sequelize.STRING},
 
     modifiedAt: { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
 

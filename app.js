@@ -219,7 +219,7 @@ function useBaseMiddleware(){
     }));
 }
 
-async function init() {
+async function createAPIServer() {
 
     // 1. 初始化全局变量
     setGlobal();
@@ -252,7 +252,7 @@ async function init() {
  ***************************************************/
 
 logger.info(`Starting ${localConfig.service} ...`)
-init()
+createAPIServer()
     .then(()=>{
         logger.info('Server Started.')
         console.info('------------------------------------------------------------------------')

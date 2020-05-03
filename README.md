@@ -1,11 +1,14 @@
 jsservice/node-sso
 ===============
 
-JSService/node-sso 是一个基于Node.js开发的用户微服务，它在整合在Spring Cloud中，启动服务时会自动注册在Eureka，并支持Java端FeignClient调用。支持多种用户登录登出方式以及用户持久化。
+JSService/node-sso 是一个基于Node.js开发的用户微服务，它可以整合在**Spring Cloud**中，以HTTP方式提供用户登录登出以及用户管理等相关接口。
+启动服务时会自动注册在**Eureka**，Java端服务发现后通过FeignClient等HTTP工具调用。
+
+JWT
 
 ## 环境要求
 
-* Node.js 10+
+* Node.js v10+
 * Eureka Server
 * Redis Server
 * MySQL/SQLite/PostgreSQL/MSSQL
@@ -14,19 +17,22 @@ JSService/node-sso 是一个基于Node.js开发的用户微服务，它在整合
 
 ### 快速开始
   ```
-  cnpm install //SQLite3需要cnpm安装
+  cnpm install          //SQLite3需要cnpm安装
   
   npm run dev
   ```
 
-### 配置
+### SSO配置
+  ```
+  
+  ```
 
 ### 目录结构
   ```
   node-sso
     |---config          //配置文件（分环境）
     |---controllers     //路由
-    |---data            //默认SQLite数据库
+    |---data            //SQLite默认数据库
     |---logs            //默认日志目录
     |---models          //数据模型
     |---modules         //自定义模块

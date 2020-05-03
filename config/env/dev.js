@@ -28,7 +28,12 @@ module.exports = {
                     appSecret : '',
                     type : 'mp'
                 },
-                appMini1 : {
+                app2 : {
+                    appId : '',
+                    appSecret : '',
+                    type : 'mp'
+                },
+                app3 : {
                     appId : '',
                     appSecret : '',
                     type : 'mini'
