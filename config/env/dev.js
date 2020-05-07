@@ -13,10 +13,28 @@ module.exports = {
 
     /**********************************************************************************************
      *
-     * 第三方登录
+     * OAuth服务器配置
      *
      **********************************************************************************************/
     oauth : {
+        tokenPath: '/oauth/token',
+        clientId: 'internal',
+        clientSecret: 'internal',
+        privateKeyPath: './config/cert/oauth-private.dev.pem',
+        publicKeyPath: './config/cert/oauth-public.dev.pem',
+        // accessTokenExpiresIn: 2*3600, //2 hours
+        // refreshTokenExpiresIn: 1*24*3600, // 1 day
+        accessTokenExpiresIn: 30, //2 hours
+        refreshTokenExpiresIn: 60, // 1 day
+    },
+
+
+    /**********************************************************************************************
+     *
+     * 第三方登录
+     *
+     **********************************************************************************************/
+    sso : {
 
         //微信
         wechat : {

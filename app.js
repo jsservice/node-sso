@@ -2,23 +2,28 @@ const pkg = require('./package.json');
 const env = process.env.NODE_ENV;
 const port = process.env.PORT || 3000;
 const localConfig = require('./config/env/'+env)
+const path = require('path');
+const fs = require('fs');
 const Koa = require('koa')
 const Redis = require('ioredis');
 const Eureka = require('eureka-js-client').Eureka;
 const Sequelize = require('sequelize');
+const KoaOAuthServer = require('./modules/oauth2/oauth-koa2-server')
+const OAuthRedisModel = require('./modules/oauth2/oauth-redis-model');
 
+const moment = require('moment')
+const requireAll = require('require-all');
 const ex2k = require('express-to-koa');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerStat = require('swagger-stats');
 const koaBodyParser = require('koa-bodyparser');
 const koaRouter = require('koa-router')
 const koaStatic = require('koa-static');
-const moment = require('moment')
-const requireAll = require('require-all');
-const constants = require('./config/constants');
+const koaExtension = require('./modules/extension');
 const log4js = require('./modules/logger');
 const log4jsIns = log4js.getLog4jsInstance(localConfig.service, localConfig.log)
 const logger = log4jsIns.getLogger("[MAIN]");
+const constants = require('./config/constants');
 const network = require('./utils/NetworkUtils')
 const app = new Koa()
 
@@ -217,6 +222,9 @@ function useBaseMiddleware(){
     app.use(koaBodyParser({
         enableTypes : ['json', 'form']
     }));
+    app.use(koaExtension({
+        logger : logger
+    }))
 }
 
 async function createAPIServer() {
@@ -241,8 +249,33 @@ async function createAPIServer() {
 
     // 7. 加载数据模型
     await loadDBModels();
+
+    createOAuth2Server()
+
 }
 
+function createOAuth2Server(){
+    const privatePath = path.resolve(__dirname, localConfig.oauth.privateKeyPath);
+    const publicPath = path.resolve(__dirname, localConfig.oauth.publicKeyPath);
+    const publicKey = String(fs.readFileSync(publicPath));
+    const privateKey = String(fs.readFileSync(privatePath));
+    const router = koaRouter();
+    const oAuthServer = new KoaOAuthServer({
+        logger: logger,
+        model: new OAuthRedisModel({
+            cache : JSService.cache,
+            publicKey : publicKey,
+            privateKey : privateKey,
+        }),
+    });
+    //router.all("/oauth/authenticate", oAuthServer.authenticate());
+    //router.all("/oauth/authorize", oAuthServer.authorize(option));
+    router.all("/oauth/token", oAuthServer.token());
+    router.all("/oauth/token_key", oAuthServer.tokenKey(publicKey));
+    router.all("/oauth/check_token", oAuthServer.checkToken(publicKey));
+    app.use(router.routes(), router.allowedMethods())
+
+}
 
 
 /***************************************************

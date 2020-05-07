@@ -7,14 +7,19 @@ module.exports = {
      *
      * /auth/login:
      *   post:
-     *     summary: 获得优惠播报信息
+     *     summary: 登录
      *     tags:
      *       - Activity 活动
      *     consumes:
      *       - application/x-www-form-urlencoded
      *     parameters:
-     *       - name: storeCode
-     *         description: 餐厅代码.
+     *       - name: username
+     *         description: 用户名.
+     *         in: formData
+     *         required: true
+     *         type: string
+     *       - name: password
+     *         description: 密码.
      *         in: formData
      *         required: true
      *         type: string
@@ -24,12 +29,14 @@ module.exports = {
      */
     'post /auth/login' : async function(ctx, next){
 
-        let resp = await JSService.models.User.findAll({
-            //attributes: ['foo', 'bar']
-        });
+        ctx.checkRequired(['username', 'password'])
+
+        let username = ctx.getParam("username")
+        let password = ctx.getParam("password")
+        let rememberMe = ctx.getParam("rememberMe") || false;
+
 
         ctx.body = {
-            storeCode : resp,
             message : 'ok'
         }
 
