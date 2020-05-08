@@ -1,4 +1,4 @@
-'use strict'
+const BizError = require('../BizError');
 
 module.exports = function(opts){
 
@@ -22,6 +22,18 @@ module.exports = function(opts){
             || '';
     }
 
+    function _ok(data) {
+        this.body = {
+            code: 0,
+            msg: null,
+            data: data
+        }
+    }
+
+    function _bizError(code, message, data){
+        throw new BizError(code, message, data);
+    }
+
     return async (ctx, next)=>{
 
         // Logger start
@@ -30,8 +42,20 @@ module.exports = function(opts){
         //ctx扩展
         ctx.checkRequired = _checkRequired;       // 必填验证
         ctx.getParam = _getParam;                 // 获取参数
+        ctx.ok = _ok                              // 包装数据
+        ctx.bizError = _bizError                  // 业务异常
 
-        await next();
+        try{
+            await next();
+        }catch (e) {
+            if(e && e.name === 'BizError'){
+                ctx.body = {
+                    code: e.code,
+                    msg: e.message,
+                    data: e.data
+                };
+            }
+        }
 
         // Logger end
         opts.logger.info(`${ctx.method} ${ctx.url} --> ${ctx.status}`)

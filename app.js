@@ -226,11 +226,13 @@ function useBaseMiddleware(){
         logger : logger
     }))
     app.on('error', (err, ctx) => {
-        if(err.status != 400 && err.status != 200){
-            logger.error('Internal server error', err)
-        }else if(err.status == 400){
+        if(err.status == 400){
             //logger.error(err.message)
             logger.error(err)
+        }else if(err.status == 200){
+            // console.log(err)
+        }else{
+            logger.error('Internal server error', err)
         }
     });
 }
