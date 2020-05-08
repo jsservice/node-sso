@@ -11,7 +11,7 @@
     "start": "node bin/www",
     "dev": "cross-env NODE_ENV='dev' ./node_modules/.bin/nodemon bin/www",
     "prod": "cross-env NODE_ENV='prod' PORT=8080 node bin/www",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha tests"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -41,9 +41,10 @@
     "swagger-stats": "^0.95.16"
   },
   "devDependencies": {
-    "cross-env": "^7.0.0",
-    "nodemon": "^1.19.1",
     "chai": "4.2.0",
-    "mochawesome": "5.0.0"
+    "cross-env": "^7.0.0",
+    "mocha": "^7.1.2",
+    "mochawesome": "5.0.0",
+    "nodemon": "^1.19.1"
   }
 }
