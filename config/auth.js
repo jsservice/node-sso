@@ -1,52 +1,57 @@
 /**
  *
- * API权限定义文件
+ * API权限定义文件（按定义顺序，倒序优先匹配）
  *
- *  - user       用户登录权限
- *  - store      选店权限
- *  - session    Session权限
- *  - order      订单权限
+ *  - path (required)         请求路径
+ *  - method                  请求方法，默认为*
+ *  - authenticated           用户登录权限，默认为true
+ *  - hasRole
+ *  - hasScope
+ *  - hasAuthority
  *
  */
-module.exports = {
+module.exports = [
 
-    /**
-     * Session权限
-     */
-    session : [
-        '^(?!/init/|/cache/)',
-    ],
+    {
+        path : '/api/user',
+        method : '*',
+        hasAuthority:'admin',
+    },
 
-    /**
-     * 登录权限
-     */
-    user : [
-        '^/customer/',
-        '^/vgold/',
-        '^/payment/getAccountStatus',
-        '^/order/history',
-    ],
+    {
+        path : '/api/*',
+        method : 'get',
+        authenticated: true,
+        hasAuthority:'admin',
+    },
 
-    /**
-     * 选店权限
-     */
-    store : [
-        '^/order/create',
-        '^/vgold/queryRewardInfo',
-    ],
+    {
+        path : '/api/user',
+        method : 'delete',
+        authenticated: true,
+        hasAuthority:'admin',
+    },
 
-    /**
-     * 订单权限
-     */
-    order : [
-        '^/order/confirm',
-        '^/order/submit',
-        '^/order/clearItem',
-        '^/prime/queryAvailablePrime',
-        '^/prime/getPrimeDiscountPrice',
-        '^/prime/getRenewPrimeCoupon'
-    ],
+    {
+        path : '/api/**',
+        method : '*',
+        authenticated: true,
+    },
+
+    {
+        path : '/oauth/token_key',
+        method : '*',
+        authenticated: false
+    },
+
+    {
+        path : '/oauth/**',
+        method : '*',
+        authenticated: true,
+        hasRole:'',
+        hasScope:'openid',
+    },
 
 
 
-}
+]

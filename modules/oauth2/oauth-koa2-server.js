@@ -43,9 +43,8 @@ class KoaOAuthServer {
 
     // Returns token authentication middleware
     authenticate() {
-        this.logger.debug('Creating authentication endpoint middleware');
         return async (ctx, next) => {
-            this.logger.debug('Running authenticate endpoint middleware');
+            this.logger.debug('OAuth : Running authenticate endpoint middleware');
             const request  = new Request(ctx.request),
                 response = new Response(ctx.response);
 
@@ -62,9 +61,8 @@ class KoaOAuthServer {
     // Returns authorization endpoint middleware
     // Used by the client to obtain authorization from the resource owner
     authorize(options) {
-        this.logger.debug('Creating authorization endpoint middleware');
         return async (ctx, next) => {
-            this.logger.debug('Running authorize endpoint middleware');
+            this.logger.debug('OAuth : Running authorize endpoint middleware');
             const request  = new Request(ctx.request),
                 response = new Response(ctx.response);
 
@@ -103,9 +101,8 @@ class KoaOAuthServer {
     // Returns token endpoint middleware
     // Used by the client to exchange authorization grant for access token
     token() {
-        this.logger.debug('Creating token endpoint middleware');
         return async (ctx, next) => {
-            this.logger.debug('Running token endpoint middleware');
+            this.logger.debug('OAuth : Running token endpoint middleware');
             const request  = new Request(ctx.request),
                 response = new Response(ctx.response);
 
@@ -126,7 +123,6 @@ class KoaOAuthServer {
     // Returns scope check middleware
     // Used to limit access to a route or router to carriers of a certain scope.
     scope(required) {
-        this.logger.debug(`Creating scope check middleware (${required})`);
         return (ctx, next) => {
             const result = this.checkScope(required, ctx.state.oauth.token);
             if(result !== true) {
@@ -143,18 +139,17 @@ class KoaOAuthServer {
     }
 
     _handleResponse(ctx, response) {
-        this.logger.debug(`Preparing success response (${response.status})`);
+        this.logger.debug(`OAuth : Preparing success response (${response.status})`);
         ctx.set(response.headers);
         ctx.status = response.status;
         ctx.body   = response.body;
     }
 
     _handleError(err, ctx) {
-        this.logger.debug(`Preparing error response (${err.code || 500})`);
+        this.logger.debug(`OAuth : Preparing error response (${err.code || 500})`);
 
         const response = new Response(ctx.response);
         ctx.set(response.headers);
-
         ctx.status = err.code || 500;
         throw err;
     }

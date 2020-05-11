@@ -5,10 +5,15 @@ module.exports = {
 
     /**********************************************************************************************
      *
-     * 本服务名称
+     * 服务名称
+     * ---------------------------------------------
+     * 1.在所有微服务中确保唯一
+     * 2.只能用英文、中划线、下划线
+     *
+     * eg: node_sso
      *
      **********************************************************************************************/
-    service : 'node-sso',
+    serviceId : 'node-sso',
 
 
     /**********************************************************************************************
@@ -17,11 +22,25 @@ module.exports = {
      *
      **********************************************************************************************/
     oauth : {
-        tokenPath: '/oauth/token',
-        clientId: 'internal',
-        clientSecret: 'internal',
+
+        //生产环境要改掉
+        clientId: 'web_app',
+
+        //生产环境要改掉
+        clientSecret: 'changeit',
+
+        //内部微服务鉴权
+        serviceClientId: 'internal',
+
+        //内部微服务鉴权
+        serviceClientSecret: 'internal',
+
+        //私钥
         privateKeyPath: './config/cert/oauth-private.dev.pem',
+
+        //公钥
         publicKeyPath: './config/cert/oauth-public.dev.pem',
+
         // accessTokenExpiresIn: 2*3600, //2 hours
         // refreshTokenExpiresIn: 1*24*3600, // 1 day
         accessTokenExpiresIn: 30, //2 hours
@@ -202,7 +221,7 @@ module.exports = {
      **********************************************************************************************/
     log :{
 
-        level : 'info',
+        level : 'debug',
 
         //path : '/opt/log/jsservice/node-sso',
 

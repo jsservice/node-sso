@@ -12,40 +12,49 @@ const ePath                    = 'oauth2-server/lib/errors/',
     InvalidGrantError          = require(ePath + 'invalid-grant-error');
 
 const RedisDataFormat = {
-    CLIENT: 'oauth_clients:%s',
-    TOKEN: 'oauth_tokens:%s',
-    USER: 'oauth_users:%s'
+    CLIENT: `${localConfig.serviceId}_oauth_clients:%s`,
+    TOKEN: `${localConfig.serviceId}_oauth_tokens:%s`,
+    USER: `${localConfig.serviceId}_oauth_users:%s`
 };
 function OAuthRedisModel(options) {
     this.redis = options.cache;
+    this.logger = options.logger;
     this.publicKey = options.publicKey;
     this.privateKey = options.privateKey;
 }
 
 OAuthRedisModel.prototype.getClient = async function(clientId, clientSecret){
+    this.logger.debug(`OAuth : Get client, clientId is ${clientId}`)
+    if(clientId+clientSecret === localConfig.oauth.clientId+localConfig.oauth.clientSecret){
+        return await {
+            id : clientId,
+            grants:['implicit', 'refresh_token', 'password', 'authorization_code'],
+            //redirectUris
+        }
+    }
+
+    return null;
+
     let key = format(RedisDataFormat.CLIENT, clientId)
     // console.log(this.redis.get)
     // let data = await this.redis.get(key)
-    return await {
-        id : localConfig.oauth.clientId,
-        grants:['password', 'client_credentials', 'refresh_token'],
-        //redirectUris
-        //accessTokenLifetime
-        //refreshTokenLifetime
-    }
+
 }
 
 OAuthRedisModel.prototype.getUserFromClient = async function(client){
+    this.logger.debug(`OAuth : Get user from client, user is `)
     return await {username: 'internal'}
 }
 
 OAuthRedisModel.prototype.getUser = async function(username, password){
+    this.logger.debug(`OAuth : Get user, username is ${username}`)
     console.log(username);
     console.log(password)
     return await {username: '123123'}
 }
 
 OAuthRedisModel.prototype.generateAccessToken = async function(client, user, scope){
+    this.logger.debug(`OAuth : Generate access token.`)
     const token = jwt.sign(user, this.privateKey, {
         algorithm: 'RS256',
         expiresIn: localConfig.oauth.accessTokenExpiresIn //JWT expires time
@@ -54,6 +63,7 @@ OAuthRedisModel.prototype.generateAccessToken = async function(client, user, sco
 }
 
 OAuthRedisModel.prototype.generateRefreshToken = async function(client, user, scope){
+    this.logger.debug(`OAuth : Generate refresh token.`)
     const token = jwt.sign(user, this.privateKey, {
         algorithm: 'RS256',
         expiresIn: localConfig.oauth.refreshTokenExpiresIn //JWT expires time
@@ -62,6 +72,7 @@ OAuthRedisModel.prototype.generateRefreshToken = async function(client, user, sc
 }
 
 OAuthRedisModel.prototype.saveToken = async function(token, client, user){
+    this.logger.debug(`OAuth : Save tokens.`)
     const data = {
         accessToken: token.accessToken,
         accessTokenExpiresAt: token.accessTokenExpiresAt,
@@ -77,6 +88,7 @@ OAuthRedisModel.prototype.saveToken = async function(token, client, user){
 }
 
 OAuthRedisModel.prototype.getAccessToken = async function(accessToken){
+    this.logger.debug(`OAuth : Get access token.`)
     let value = await this.redis.get(format(RedisDataFormat.TOKEN, accessToken))
     let token = JSON.parse(value)
     return {
@@ -89,6 +101,7 @@ OAuthRedisModel.prototype.getAccessToken = async function(accessToken){
 }
 
 OAuthRedisModel.prototype.getRefreshToken = async function(refreshToken){
+    this.logger.debug(`OAuth : Get refresh token.`)
     let value = await this.redis.get(format(RedisDataFormat.TOKEN, refreshToken))
     if(!value){
         throw new InvalidGrantError();
@@ -104,6 +117,7 @@ OAuthRedisModel.prototype.getRefreshToken = async function(refreshToken){
 }
 
 OAuthRedisModel.prototype.revokeToken = async function(token){
+    this.logger.debug(`OAuth : Revoke token.`)
     let tokenKey = format(RedisDataFormat.TOKEN, token);
     try{
         await this.redis.set(tokenKey, null)
@@ -111,6 +125,14 @@ OAuthRedisModel.prototype.revokeToken = async function(token){
     }catch (e) {
         return false;
     }
+}
+
+OAuthRedisModel.prototype.validateScope = async function(user, client, scope) {
+    this.logger.debug(`OAuth : Validate scope, client is ${client.id}`)
+    console.log(user)
+    console.log(client)
+    console.log(scope)
+    return scope
 }
 
 

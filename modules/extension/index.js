@@ -54,6 +54,8 @@ module.exports = function(opts){
                     msg: e.message,
                     data: e.data
                 };
+            }else{
+                throw e;
             }
         }
 

@@ -4,21 +4,19 @@ const {resolve} = require('path')
 
 module.exports = {
 
-    getLog4jsInstance(serviceName, config){
+    getLog4jsInstance(serviceId, config){
 
-        let path = config.path || `${resolve('./')}/logs`;
+        let path = config.path || resolve(process.cwd(), 'logs');
         let level = config.level || 'info'
 
         log4js.configure({
             appenders: {
                 out: { type: 'stdout' },
-                http : { type: 'file', filename: `${path}/${serviceName}.log`},
-                api : { type: 'file', filename: `${path}/${serviceName}.api.log`},
+                main : { type: 'file', filename: `${path}/${serviceId}.log`},
             },
             categories: {
                 default: { appenders: ['out'], level: 'info' },
-                '[MAIN]': { appenders: ['out', 'http'], level: level },
-                '[API]': { appenders: ['out', 'api'], level: level },
+                '[MAIN]': { appenders: ['out', 'main'], level: level },
             }
         });
         return log4js;

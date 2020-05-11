@@ -20,10 +20,12 @@ const koaBodyParser = require('koa-bodyparser');
 const koaRouter = require('koa-router')
 const koaStatic = require('koa-static');
 const koaExtension = require('./modules/extension');
+const security = require('./modules/security');
 const log4js = require('./modules/logger');
-const log4jsIns = log4js.getLog4jsInstance(localConfig.service, localConfig.log)
+const log4jsIns = log4js.getLog4jsInstance(localConfig.serviceId, localConfig.log)
 const logger = log4jsIns.getLogger("[MAIN]");
 const constants = require('./config/constants');
+const authCfg = require('./config/auth')
 const network = require('./utils/NetworkUtils')
 const app = new Koa()
 
@@ -64,7 +66,7 @@ async function connectEurekaServer(){
         eureka : localConfig.eureka.server,
         logger : logger,
         instance: {
-            app: localConfig.service,
+            app: localConfig.serviceId,
             hostName: JSService.env.host,
             ipAddr: JSService.env.address,
             statusPageUrl: 'http://'+JSService.env.address+':'+JSService.env.port+'/info',
@@ -171,7 +173,7 @@ function initSwaggerAndStat(){
         definition: {
             //openapi: '3.0.0',  // Specification (optional, defaults to swagger: '2.0')
             info: {
-                title: localConfig.service,
+                title: localConfig.serviceId,
                 version: pkg.version
             },
         },
@@ -194,7 +196,7 @@ function initSwaggerAndStat(){
 async function loadDBModels() {
     const dbConfig = localConfig.database
     if(dbConfig.options.dialect === 'sqlite'){
-        const dbFilePath =  `${__dirname}/data/${localConfig.service}.db`;
+        const dbFilePath =  `${__dirname}/data/${localConfig.serviceId}.db`;
         dbConfig.options.storage = dbConfig.options.storage || dbFilePath;
     }else if(dbConfig.options.dialect === 'mysql'){
 
@@ -226,9 +228,9 @@ function useBaseMiddleware(){
         logger : logger
     }))
     app.on('error', (err, ctx) => {
-        if(err.status == 400){
-            //logger.error(err.message)
-            logger.error(err)
+        if(err.status == 400 || err.status == 401 || err.status == 403){
+            logger.warn(err.message)
+            // logger.error(err)
         }else if(err.status == 200){
             // console.log(err)
         }else{
@@ -254,14 +256,24 @@ async function createAPIServer() {
     // 5. Swagger UI & 监控（需要在路由之前）
     initSwaggerAndStat();
 
+    // 7. 初始化权限
+    initWebSecurity();
+
     // 6. 加载路由
     loadControllers();
 
     // 7. 加载数据模型
     await loadDBModels();
 
+    // 8. OAuth2服务
     createOAuth2Server()
 
+}
+
+function initWebSecurity() {
+    app.use(security({
+        config: authCfg
+    }))
 }
 
 function createOAuth2Server(){
@@ -273,15 +285,16 @@ function createOAuth2Server(){
     const oAuthServer = new KoaOAuthServer({
         logger: logger,
         model: new OAuthRedisModel({
-            cache : JSService.cache,
-            publicKey : publicKey,
-            privateKey : privateKey,
+            cache: JSService.cache,
+            logger: logger,
+            publicKey: publicKey,
+            privateKey: privateKey,
         }),
     });
     //router.all("/oauth/authenticate", oAuthServer.authenticate());
     //router.all("/oauth/authorize", oAuthServer.authorize(option));
-    router.all("/oauth/token", oAuthServer.token());
-    router.all("/oauth/token_key", oAuthServer.tokenKey(publicKey));
+    router.post("/oauth/token", oAuthServer.token());
+    router.get("/oauth/token_key", oAuthServer.tokenKey(publicKey));
     router.all("/oauth/check_token", oAuthServer.checkToken(publicKey));
     app.use(router.routes(), router.allowedMethods())
 
@@ -294,7 +307,7 @@ function createOAuth2Server(){
  *
  ***************************************************/
 
-logger.info(`Starting ${localConfig.service} ...`)
+logger.info(`Starting ${localConfig.serviceId} ...`)
 createAPIServer()
     .then(()=>{
         logger.info('Server Started.')
