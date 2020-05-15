@@ -1,6 +1,6 @@
 /**
  *
- * API权限定义文件（按定义顺序，倒序优先匹配）
+ * API权限定义文件（按完全匹配优先，通配符置后）
  *
  *  - path (required)         请求路径
  *  - method                  请求方法，默认为*
@@ -39,17 +39,9 @@ module.exports = [
     },
 
     {
-        path : '/oauth/token_key',
-        method : '*',
-        authenticated: false
-    },
-
-    {
         path : '/oauth/**',
         method : '*',
-        authenticated: true,
-        hasRole:'',
-        hasScope:'openid',
+        authenticated: false
     },
 
 

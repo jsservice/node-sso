@@ -4,13 +4,15 @@ const minimatch = require("minimatch")
 module.exports = function(options){
 
     const authConfig = options.config;
+    const logger = options.logger;
+
     for(let i=0;i<authConfig.length;i++){
         let cfg = authConfig[i];
         if(!cfg.path){
-            throw new Error(`Path or method is required of element ${i} in security config.`)
+            throw new Error(`Path is required of element ${i} in security config.`)
         }
         cfg.method = cfg.method || '*'
-        cfg.authenticated = cfg.authenticated || true
+        cfg.authenticated = cfg.authenticated === undefined? true : cfg.authenticated
         cfg.seq = i;
     }
     authConfig.sort((a,b)=>{
@@ -39,6 +41,7 @@ module.exports = function(options){
         for(let i=0;i<authConfig.length;i++){
             let cfg = authConfig[i];
             if(minimatch(ctx.url, cfg.path)){
+                logger.debug(`Matched security config, path : ${cfg.path}`)
                 if(cfg.authenticated === false){
                     //public resource
                     return await next();

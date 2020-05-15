@@ -256,23 +256,24 @@ async function createAPIServer() {
     // 5. Swagger UI & 监控（需要在路由之前）
     initSwaggerAndStat();
 
-    // 7. 初始化权限
+    // 6. 初始化权限
     initWebSecurity();
 
-    // 6. 加载路由
+    // 7. 加载路由
     loadControllers();
 
-    // 7. 加载数据模型
+    // 8. 加载数据模型
     await loadDBModels();
 
-    // 8. OAuth2服务
+    // 9. OAuth2服务
     createOAuth2Server()
 
 }
 
 function initWebSecurity() {
     app.use(security({
-        config: authCfg
+        config: authCfg,
+        logger: logger,
     }))
 }
 
