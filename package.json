@@ -31,7 +31,7 @@
     "koa-static": "^5.0.0",
     "log4js": "^6.1.2",
     "minimatch": "^3.0.4",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mysql2": "^2.1.0",
     "oauth2-server": "^3.0.1",
     "query-string": "^6.11.1",
